@@ -6,9 +6,9 @@ This method is written in Python3 and requires the [pandas](https://pandas.pydat
 
 ## Standard Pipeline
 
-Concatenate TCR immune repertoire data from cancer and non-cancer patient samples into one file
-Run GIANA on the concatenated file to produce a cluster file
-Input the cluster file and CSV file of labeled samples
+1. Concatenate TCR immune repertoire data from cancer and non-cancer patient samples into one file
+2. Run GIANA on the concatenated file to produce a cluster file
+3. Input the cluster file and CSV file of labeled samples
 
 ## Input data format
 
