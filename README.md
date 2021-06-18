@@ -6,9 +6,9 @@ This method is written in Python3 and requires the [pandas](https://pandas.pydat
 
 ## Standard Pipeline
 
-1. Concatenate TCR immune repertoire data from cancer and non-cancer patient samples into one file
-2. Run GIANA on the concatenated file to produce a cluster file
-3. Input the cluster file and CSV file of labeled samples
+Concatenate TCR immune repertoire data from cancer and non-cancer patient samples into one file
+Run GIANA on the concatenated file to produce a cluster file
+Input the cluster file and CSV file of labeled samples
 
 ## Input data format
 
@@ -18,10 +18,17 @@ This method is written in Python3 and requires the [pandas](https://pandas.pydat
 
 ## Usage
 The following code performs TCR immune repertoire classification:
->```python getTrainingData.py GIANA_output.txt sampleLabels.csv cluster_size(int; optional; default=50) cluster_purity(float; optional; default=0.8)```
+>```python getTrainingData.py -f GIANA_output.txt -l sampleLabels.csv -s cluster_size -p cluster_purity```
 
-The method requires two input files: clustered output from GIANA and a labeled CSV file of the sample ID and donor type.
+| Command| Description |
+| ----------- | ----------- |
+|-h, --help| show this help message and exit |
+| -f FILE, --file=FILE| Input cluster file of clustered CDR3 sequences |
+| -l FILE, --labels=FILE| Labeled CSV with sample IDs and donor type |
+| -s SIZE, --size=SIZE| Cluster size. Size must be an integer. If omitted, default cluster size is 50. |
+| -p PURITY, --purity=PURITY| Cluster purity. Purity must be a float ≥0 and ≤1. If omitted, default cluster purity is 0.80.|
+|-o OUTPUT_DIR, --outputDIR=OUTPUT_DIR| Output directory for training and validation sets. If not given, a directory named 'TrainingData' will be created to hold the training and validation data files. |
 
-Users can optionally customize cluster size and purity thresholds by adjusting the third and fourth arguments, respectively. Leaving these arguments blank results in the method using a default cluster size of <= 50 and a cluster purity of 80%.
+The method requires two input files: clustered output from GIANA and a labeled CSV file of the sample ID and donor type. Users can optionally customize cluster size and purity. Leaving these arguments blank results in the method using a default cluster size of ≤50 and a cluster purity of 80%.
 
-The method creates a new directory “TrainingData” and generates four output files for cancer and non-cancer training and validation sets. Non-cancer training data can be used as true negative samples and cancer training data can be used as true positive samples. Sequences are randomly shuffled and split such that 80% of sequences for each length are reserved for training and 20% are withheld for validation.
+The method creates a new directory and generates four output files for cancer and non-cancer training and validation sets. Users can optionally name this directory or use the default directory name “TrainingData.” Non-cancer training data can be used as true negative samples and cancer training data can be used as true positive samples. Sequences are randomly shuffled and split such that 80% of sequences for each length are reserved for training and 20% are withheld for validation.
