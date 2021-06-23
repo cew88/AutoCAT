@@ -1,6 +1,6 @@
-# Predicting Antigen Specificity of TCRs (PAST)
+# AutoCAT: Automated Cancer-Associated TCR discovery
 
-PAST is a computational method to predict tumor associated TCRs from targeted TCR-seq data. The method utilizes [GIANA](https://github.com/s175573/GIANA) to quickly cluster similar CDR3 sequences. These clusters are then filtered to output training and validation data that can be used to train [DeepCAT](https://github.com/s175573/DeepCAT), a deep learning algorithm that identifies cancer associated beta chain TCRs. PAST method is written in Python3 and requires the [pandas](https://pandas.pydata.org/) library to be installed.
+AutoCAT is a computational method to predict tumor associated TCRs from targeted TCR-seq data. The method utilizes [GIANA](https://github.com/s175573/GIANA) to quickly cluster similar CDR3 sequences. These clusters are then filtered to output training and validation data that can be used to train [DeepCAT](https://github.com/s175573/DeepCAT), a deep learning algorithm that identifies cancer associated beta chain TCRs. AutoCAT is written in Python3 and requires the [pandas](https://pandas.pydata.org/) library to be installed.
 
 ## Standard Pipeline
 
