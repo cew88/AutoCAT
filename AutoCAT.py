@@ -20,7 +20,6 @@ inputPurity = float(opt.clusterPurity)
 outDIR = opt.outDIR
 generateGraph = opt.generateGraph
 
-
 if not os.path.isdir(inputDIR):
     print ("Must provide a valid input directory.")
     exit()
@@ -150,6 +149,72 @@ def graphAvailableSeq(allID):
 
     plt.savefig("graphAvailableSequences.png", bbox_inches='tight')
 
+def graphSamplePurity(clusterPurityDict, clusterSizeDict, userSize, userPurity):
+    cancerPurityDict = {0.6: [0, 0], 0.7: [0, 0], 0.8: [0, 0], 0.9: [0, 0]}
+    nonCancerPurityDict = {0.6: [0, 0], 0.7: [0, 0], 0.8: [0, 0], 0.9: [0, 0]}
+
+    for purity in cancerPurityDict: 
+        for clusterID in clusterPurityDict:
+            if (clusterSizeDict[clusterID] <= userSize):
+                clusterPurity = clusterPurityDict[clusterID]/clusterSizeDict[clusterID]
+
+                if (clusterPurity >= purity):
+                    cancerPurityDict[purity][0] += clusterSizeDict[clusterID]-clusterPurityDict[clusterID]
+                    cancerPurityDict[purity][1] += clusterSizeDict[clusterID]
+
+                elif (clusterPurity <= float(Decimal('1')-Decimal(str(purity)))):
+                    nonCancerPurityDict[purity][0] += clusterSizeDict[clusterID] - clusterPurityDict[clusterID]
+                    nonCancerPurityDict[purity][1] += clusterSizeDict[clusterID]
+                    
+
+    labels = ["Classified\nCancer", "Classified\nNoncancer"]
+    legendLabels = ["Classified as Cancer", "Classified as Noncancer", "From Control Samples", "From Cancer Samples"]
+
+    outerColor = ["lightcoral", "lightsteelblue"]
+    innerColor = ["dodgerblue", "crimson", "dodgerblue", "crimson"]
+
+    circle_00 = plt.Circle((0,0),0.5,color='black', fc='white',linewidth=0)
+    circle_01 = plt.Circle((0,0),0.5,color='black', fc='white',linewidth=0)
+    circle_10 = plt.Circle((0,0),0.5,color='black', fc='white',linewidth=0)
+    circle_11 = plt.Circle((0,0),0.5,color='black', fc='white',linewidth=0)
+
+    fig, axs = plt.subplots(2,2, figsize=(10,10))
+    plt.axis('equal')
+    
+    axs[0,0].pie([cancerPurityDict[0.6][0]+cancerPurityDict[0.6][1], nonCancerPurityDict[0.6][0]+nonCancerPurityDict[0.6][1]],
+     startangle=90, radius=1, autopct='%1.1f%%', colors=outerColor, pctdistance=1.1)
+    axs[0,0].pie([cancerPurityDict[0.6][0], cancerPurityDict[0.6][1], nonCancerPurityDict[0.6][0], nonCancerPurityDict[0.6][1]],
+     startangle=90,radius=0.75, autopct='%1.1f%%', colors=innerColor, explode=(0.02, 0.02, 0.02, 0.02))
+    axs[0,0].add_artist(circle_00)
+    axs[0,0].set_title('60% Purity')
+    
+    plt.axis('equal')
+    axs[0,1].pie([cancerPurityDict[0.7][0]+cancerPurityDict[0.6][1], nonCancerPurityDict[0.6][0]+nonCancerPurityDict[0.6][1]],
+     startangle=90, radius=1, autopct='%1.1f%%', colors=outerColor, pctdistance=1.1)
+    axs[0,1].pie([cancerPurityDict[0.7][0], cancerPurityDict[0.6][1], nonCancerPurityDict[0.6][0], nonCancerPurityDict[0.6][1]],
+     startangle=90,radius=0.75, autopct='%1.1f%%', colors=innerColor, explode=(0.02, 0.02, 0.02, 0.02))
+    axs[0,1].add_artist(circle_01)
+    axs[0,1].set_title('70% Purity')
+    
+    plt.axis('equal')
+    axs[1,0].pie([cancerPurityDict[0.8][0]+cancerPurityDict[0.6][1], nonCancerPurityDict[0.6][0]+nonCancerPurityDict[0.6][1]],
+     startangle=90, radius=1, autopct='%1.1f%%', colors=outerColor, pctdistance=1.1)
+    axs[1,0].pie([cancerPurityDict[0.8][0], cancerPurityDict[0.6][1], nonCancerPurityDict[0.6][0], nonCancerPurityDict[0.6][1]],
+     startangle=90,radius=0.75, autopct='%1.1f%%', colors=innerColor, explode=(0.02, 0.02, 0.02, 0.02))
+    axs[1,0].add_artist(circle_10)
+    axs[1,0].set_title('80% Purity')
+
+    plt.axis('equal')
+    axs[1,1].pie([cancerPurityDict[0.9][0]+cancerPurityDict[0.6][1], nonCancerPurityDict[0.6][0]+nonCancerPurityDict[0.6][1]],
+     startangle=90, radius=1, autopct='%1.1f%%', colors=outerColor, pctdistance=1.1)
+    axs[1,1].pie([cancerPurityDict[0.9][0], cancerPurityDict[0.6][1], nonCancerPurityDict[0.6][0], nonCancerPurityDict[0.6][1]],
+     startangle=90,radius=0.75, autopct='%1.1f%%', colors=innerColor, explode=(0.02, 0.02, 0.02, 0.02))
+    axs[1,1].add_artist(circle_11)
+    axs[1,1].set_title('90% Purity')    
+    
+    plt.legend(legendLabels, loc="center", bbox_to_anchor=(-0.1,0))
+    plt.savefig("graphSamplePurity.png")
+
 def getTrainingandValidation(cancerDict, nonCancerDict):
     # Shuffle and distribute sequences for training and validations via 80/20 split
     cancerTrain = []
@@ -194,7 +259,6 @@ def getTrainingandValidation(cancerDict, nonCancerDict):
             f.write(n + "\n")
     f.close()
 
-
 allID = getInputFiles(inputDIR)
 runGIANA()
 clusterPurityDict, clusterSizeDict = getClusterComposition(allID)
@@ -203,3 +267,4 @@ getTrainingandValidation(cancerDict, nonCancerDict)
 
 if (generateGraph):
     graphAvailableSeq(allID)
+    graphSamplePurity(clusterPurityDict, clusterSizeDict, inputSize, inputPurity)
