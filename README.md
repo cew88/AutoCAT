@@ -1,8 +1,8 @@
-# AutoCAT: Automated Cancer-Associated TCR discovery  
+# AutoCAT: Automated Cancer-Associated TCR discovery
 
 AutoCAT is a computational method to predict tumor-associated TCRs from targeted TCR-seq data. The method utilizes [GIANA](https://github.com/s175573/GIANA) to quickly cluster similar CDR3 sequences. These clusters are then filtered to output training and validation data that can be used to train [DeepCAT](https://github.com/s175573/DeepCAT), a deep learning algorithm that identifies cancer associated beta chain TCRs. AutoCAT acts as a bridge to connect GIANA and DeepCAT.
 
-AutoCAT is written in Python3 and requires the following dependencies to be installed: 
+AutoCAT is written in Python3 and requires the following dependencies to be installed:
 
 * [biopython](https://biopython.org/)
 
@@ -10,50 +10,59 @@ AutoCAT is written in Python3 and requires the following dependencies to be inst
 
 * [scikit-learn](https://scikit-learn.org/stable/)
 
-* [matplotlib](https://matplotlib.org/)  
+* [matplotlib](https://matplotlib.org/)
 
-* [numpy](https://numpy.org/)  
+* [numpy](https://numpy.org/)
 
-* [pandas](https://pandas.pydata.org/) 
+* [pandas](https://pandas.pydata.org/)
 
-After installing these dependencies, please download the AutoCAT repository, which includes sample data as well as ```GIANA4.py```, the associated TRBV allele data ```Imgt_Human_TRBV.fasta```, and ```query.py```.
+After installing these dependencies, please download the AutoCAT repository, which includes sample data as well as ```GIANA4.py```, the associated TRBV allele data ```Imgt_Human_TRBV.fasta```, and ```query.py```. Intermediate output files from AutoCAT, including the concatenated file of all input samples and cluster file, are provided for download on Zenodo: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5176884.svg)](https://doi.org/10.5281/zenodo.5176884)  
 
 ## Standard Pipeline
 
-1.  Input files are concatenated into a file and a label file is generated to store where sequences are derived
-    
-2.  GIANA is run on the concatenated file
-    
-3.  Sequences are classified via cluster size and purity criteria
-    
-4.  Training and validation data files are generated as input for DeepCAT
+1. Input files are concatenated into a file and a label file is generated to store where sequences are derived
+
+2. GIANA is run on the concatenated file
+
+3. Sequences are classified via cluster size and purity criteria
+
+4. Training and validation data files are generated as input for DeepCAT
 
 #### Running the full AutoCAT Pipeline
+
 All example code is provided using the sample directory and files provided in the repository. To run the full AutoCAT pipeline, run a Python file with the following:
+
 ```
 from AutoCAT import *
 runAutoCAT(“trainingData/”)
 ```
 
 #### Running individual AutoCAT functions
+
 Running GIANA is the most time consuming aspect of AutoCAT. GIANA only needs to be run once for one set of training data. Users can concatenate all input data files and run GIANA on the output concatenated file with the following:
+
 ```
 from AutoCAT import *
 getInputFiles(“trainingData/”)
 runGIANA(“trainingData.txt”)
 ```
-Once the cluster file and labels CSV have been generated, training and validation data can be produced using ```getTrainingandValidation()```, which calls ```getClusterComposition()``` and ```separateClusters()``` automatically to generate the files needed to run DeepCAT. 
+
+Once the cluster file and labels CSV have been generated, training and validation data can be produced using ```getTrainingandValidation()```, which calls ```getClusterComposition()``` and ```separateClusters()``` automatically to generate the files needed to run DeepCAT. The following will generate training and validation files using a cluster size threshold of 50 and a cluster purity of 80%.
+
 ```
 from AutoCAT import *
 getTrainingandValidation("trainingData--RotationEncodingBL62.txt", "labels.csv", 50, 0.8)
-```
+```  
 
 To generate diagnostic plots), use the following. ```graphAvailableSeq()``` will produce a plot saved as ```graphAvailableSequences.png```, and ```graphSamplePurity()``` will produce a plot saved as ```graphPurityBarGraph.png```.
+
 ```
 from AutoCAT import *
 graphAvailableSeq("trainingData--RotationEncodingBL62.txt", "labels.csv")
-graphSamplePurity("trainingData--RotationEncodingBL62.txt", "labels.csv", 50, 0.80)
-```
+graphSamplePurity("trainingData--RotationEncodingBL62.txt", "labels.csv", 50)
+
+```  
+Once the training and validation data files have been produced, users can follow the instructions found on the [DeepCAT GitHub](https://github.com/s175573/DeepCAT#training-deepcat-models) to train a model on the data. A model trained with the provided data has been included in the directory “DeepCAT_CHKP.”
 
 ## Usage
 
@@ -65,5 +74,6 @@ graphSamplePurity("trainingData--RotationEncodingBL62.txt", "labels.csv", 50, 0.
 |```getClusterComposition(clusterFilename, labelsFilename)```| Returns dictionaries ```clusterSizeDict``` and ```clusterPurityDict``` that store information about each cluster ID and the total number of sequences within a cluster and where the number of sequences derived from cancer patients, respectively. These dictionaries are later used to classify sequences and to generate the diagnostic purity plots. Requires the cluster file generated by GIANA and the CSV of labels generated by ```getInputFiles()``` as input.|
 |```separateClusters(clusterFilename, clusterPurityDict, clusterSizeDict, userSize=None, userPurity=None)```| Returns dictionaries of sequences classified as cancer or non-cancer separated into lengths from 12 to 17 as well as the total number of sequences available for training. Requires the cluster file generated by GIANA and the two dictionaries generated by ```getClusterComposition()```. Users can optionally customize ```userSize``` and ```userPurity```.|
 |```getTrainingandValidation(clusterFilename, labelsFilename, userSize=None, userPurity=None)```| Training and validation data files are generated and can be used as input for DeepCAT. AutoCAT creates a new directory called “DeepCATInput” which contains four output files for cancer and control training and validation sets. Non-cancer training data are used as true negative samples and cancer training data can be used as true positive samples. Sequences are randomly shuffled and split such that 80% of sequences for each length are reserved for training and 20% are withheld for validation. Requires the cluster file generated by GIANA and the CSV of labels generated by ```getInputFiles()```. Users can optionally customize ```userSize``` and ```userPurity.```|
-|```graphAvailableSeq(clusterFilename, labelsFilename)```| Produces a graph showing the number of available sequences for cluster purities 60% to 100% using cluster sizes ranging from 10 to 500. |
-|```graphSamplePurity(clusterFilename, labelsFilename, userSize=None)```| Produces a bar plot displaying the percentage of sequences classified as cancer or non-cancer derived from cancer and non-cancer samples.|
+|```graphAvailableSeq(clusterFilename, labelsFilename)```| Produces a graph showing the number of available sequences for cluster purities 60% to 100% using cluster sizes ranging from 10 to 500 (graphAvailableSequences.png). |
+|```graphSamplePurity(clusterFilename, labelsFilename, userSize=None)```| Produces a line plot of the TCR classification error (graphTCRClassificationError.png), or the percent of healthy control TCRs classified as cancer as well as a bar plot displaying the percentage of sequences classified as cancer derived from cancer and non-cancer samples (graphPurityBarGraph).|
+
