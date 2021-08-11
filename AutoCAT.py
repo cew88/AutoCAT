@@ -224,14 +224,26 @@ def graphSamplePurity(clusterFilename, labelsFilename, userSize=None):
     cacData = {"Derived from\nCancer": [], "Derived from\nNonCancer": []}
     cancData = {"Derived from\nCancer": [], "Derived from\nNonCancer": []}
 
+    # TCR Classification Error
+    tcrError = {}
+
     for p in cancerPurityDict:
         cacData["Derived from\nCancer"].append( int(round(cancerPurityDict[p][1] / sum(cancerPurityDict[p]), 2) * 100))
         cacData["Derived from\nNonCancer"].append( int(round(cancerPurityDict[p][0] / sum(cancerPurityDict[p]), 2) * 100))
         cancData["Derived from\nCancer"].append( int(round(nonCancerPurityDict[p][1] / sum(nonCancerPurityDict[p]), 2) * 100))
         cancData["Derived from\nNonCancer"].append( int(round(nonCancerPurityDict[p][0] / sum(nonCancerPurityDict[p]), 2) * 100))
 
-        # print (cancerPurityDict[p][0]/(cancerPurityDict[p][0] + nonCancerPurityDict[p][0]))
+        tcrError[str(int(p * 100))+"%"] = int(round(cancerPurityDict[p][0]/(cancerPurityDict[p][0] + nonCancerPurityDict[p][0]), 2) *100)
     
+    # print (tcrError)
+    fig = plt.figure()
+    ax = plt.axes()
+    plt.plot(tcrError.keys(), tcrError.values(), marker='o')
+    plt.title("TCR Classification Error Across Different Purities")
+    plt.xlabel("Purity Criteria")
+    plt.ylabel("Percent Error")
+    plt.savefig("graphTCRClassificationError.png")
+
     classifiedAsCancer = pd.DataFrame(data=cacData, index=["60%", "70%", "80%", "90%"])
     classifiedAsNonCancer = pd.DataFrame(data=cancData,index=["60%", "70%", "80%", "90%"])
 
@@ -259,7 +271,7 @@ def graphSamplePurity(clusterFilename, labelsFilename, userSize=None):
 
     barplot.set_xticks((np.arange(0, 2 * numRows, 2) + 1 / float(numDfs + 1)) / 2.)
     barplot.set_xticklabels(df.index, rotation = 0)
-    barplot.set_title("TCR Classification Across Different Purities")
+    barplot.set_title("Classification Error Across Different Purities")
     barplot.set_xlabel("Purity Criteria")
     barplot.set_ylabel("Fraction of Sequences Wrongly Assigned")
 
