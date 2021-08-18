@@ -199,8 +199,6 @@ def graphAvailableSeq(clusterFilename, labelsFilename):
     plt.savefig("graphAvailableSequences.png", bbox_inches='tight')
 
 def graphSamplePurity(clusterFilename, labelsFilename, userSize=None):
-    if userSize == None:
-        userSize = 50
 
     clusterSizeDict, clusterPurityDict = getClusterComposition(clusterFilename, labelsFilename)
 
@@ -210,7 +208,7 @@ def graphSamplePurity(clusterFilename, labelsFilename, userSize=None):
 
     for purity in cancerPurityDict:
         for clusterID in clusterPurityDict:
-            if (clusterSizeDict[clusterID] <= userSize):
+            if (userSize == None or clusterSizeDict[clusterID] <= userSize):
                 clusterPurity = clusterPurityDict[clusterID]/clusterSizeDict[clusterID]
 
                 if (clusterPurity >= purity):
@@ -220,6 +218,8 @@ def graphSamplePurity(clusterFilename, labelsFilename, userSize=None):
                 elif (clusterPurity <= float(Decimal('1')-Decimal(str(purity)))):
                     nonCancerPurityDict[purity][0] += clusterSizeDict[clusterID] - clusterPurityDict[clusterID]
                     nonCancerPurityDict[purity][1] += clusterPurityDict[clusterID]
+
+
     #Bar Graph
     cacData = {"Derived from\nCancer": [], "Derived from\nNonCancer": []}
     cancData = {"Derived from\nCancer": [], "Derived from\nNonCancer": []}
